@@ -1002,11 +1002,11 @@ AS KD 3D JD 8H 7C 8C 5C QD 6C`
 
 // console.log(hands)
 
-var hands = cards.split("\n");
+var theHands = cards.split("\n");
 // console.log(hands)
 var splitHands = []
-for (let i = 0; i < hands.length; i++){
-	splitHands.push(hands[i].split(' '))
+for (let i = 0; i < theHands.length; i++){
+	splitHands.push(theHands[i].split(' '))
 }
 var player1Hands = [];
 var player2Hands = [];
@@ -1014,5 +1014,12 @@ for (let i = 0; i < splitHands.length; i++){
 	player1Hands.push(splitHands[i].slice(0,5));
 	player2Hands.push(splitHands[i].slice(5,splitHands.length));
 }
-console.log(splitHands[0].length)
-console.log(player2Hands)
+var hands = {
+	player1: player1Hands,
+	player2: player2Hands
+}
+// console.log(splitHands[0].length)
+// console.log(player2Hands)
+
+module.exports = hands
+
