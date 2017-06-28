@@ -14,7 +14,8 @@ var functions = {
 	},
 
 	straight: function(array) {
-		var poop = this.sortArray(array);
+		var poop = [];
+		poop.push(this.sortArray(array));
 		if ((array.indexOf(14) != -1) && (array.indexOf(2) != -1) && (array.indexOf(3) != -1) && (array.indexOf(4) != -1) && (array.indexOf(5) != -1)){
 			var aceIndex = poop.indexOf(14);
 			poop.splice(aceIndex,1,1);
@@ -39,77 +40,55 @@ var functions = {
 
 	fullHouse: function(array) {
 		var testArray = array.slice(0);
-		var counter = 0;
-		var tripCount = 0;
-		var firstPair;
-		for (let i = 0; i < testArray.length; i++){
-			for (let j = 0; j < testArray.length; j++){
-				if (testArray[i] == testArray[j]){
-					counter++;
-				}
-				if (counter == 3){
-					tripCount++;
-					firstPair = testArray[i];
-					continue;
-				}
-			}
-			counter = 0
-		}
-		if(tripCount == 0){
-			return false;
-		}
-		while(testArray.indexOf(firstPair) !== -1){
-			for (let i = 0; i < testArray.length; i++){
-				if(testArray[i] == firstPair){
-					testArray.splice(i,1);
-				}
-			}
-		}
-		return this.checkDupes(testArray,2);
+		var trips = this.checkDupes(testArray,3);
+		if(trips.hasHand){
+			testArray = this.deletePair(testArray,trips.pairs[0]);
+			var secondPair = this.checkDupes(testArray,2);
+			secondPair.trips = trips.pairs[0];
+			return secondPair;
+		}else{
+			return trips;
+		}	
 	},
 
 	twoPair: function(array) {
 		var testArray = array.slice(0);
-		var counter = 0;
-		var pairCount = 0;
-		var firstPair;
-		for (let i = 0; i < testArray.length; i++){
-			for (let j = 0; j < testArray.length; j++){
-				if (testArray[i] == testArray[j]){
-					counter++;
-				}
-				if (counter == 2){
-					pairCount++;
-					firstPair = testArray[i];
-					continue;
-				}
-			}
-			counter = 0
-		}
-		while(testArray.indexOf(firstPair) !== -1){
-			for (let i = 0; i < testArray.length; i++){
-				if(testArray[i] == firstPair){
-					testArray.splice(i,1);
-				}
-			}
-		}
-		return this.checkDupes(testArray,2);
+		var firstPair = this.checkDupes(testArray,2);
+		if(firstPair.hasHand){
+			testArray = this.deletePair(testArray,firstPair.pairs[0])
+			var secondPair = this.checkDupes(testArray,2);
+			secondPair.pairs.push(firstPair.pairs[0]);
+			this.sortArray(secondPair.pairs)
+			return secondPair;
+		}else{
+			return firstPair;
+		}	
 	},
 
 	checkDupes: function(array,numOfDupes) {
+		var stats = {
+			hasHand: false,
+			pairs: [],
+			remainingValues: []
+		}
 		var counter = 0;
+		var highPair = 0;
 		for (let i = 0; i < array.length; i++){
 			for (let j = 0; j < array.length; j++){
 				if (array[i] == array[j]){
 					counter++;
+					highPair = array[i];
 				}
 				if (counter == numOfDupes){
-					return true
+					stats.hasHand = true;
+					stats.pairs.push(highPair);
+					stats.remainingValues = this.sortArray(this.saveRemainingValues(array,highPair))
+					return stats
 				}
 			}
 			counter = 0
 		}
-		return false
+		return stats
 	},
 
 	cardSuitConversion: function(array) {
@@ -145,31 +124,84 @@ var functions = {
 		return currentHigh
 	},
 
-	findRank: function(array,high) {
-		var valueArray = this.cardValueConversion(array);
-		var suitArray = this.cardSuitConversion(array);
-		var rank = 1;
-		if(this.straight(valueArray) && this.flush(suitArray) && high == 14){
-			rank = 10;
-		}else if (this.straight(valueArray) && this.flush(suitArray)){
-			rank = 9;
-		}else if(this.checkDupes(valueArray,4)){
-			rank = 8;
-		}else if(this.fullHouse(valueArray)){
-			rank = 7;
-		}else if(this.flush(suitArray)){
-			rank = 6;
-		}else if(this.straight(valueArray)){
-			rank = 5;
-		}else if(this.checkDupes(valueArray,3)){
-			rank = 4;
-		}else if(this.twoPair(valueArray)){
-			rank = 3;
-		}else if(this.checkDupes(valueArray,2)){
-			rank = 2;
+	deletePair: function(array,valueToDelete){
+		while(array.indexOf(valueToDelete) !== -1){
+			for (let i = 0; i < array.length; i++){
+				if(array[i] == valueToDelete){
+					array.splice(i,1);
+				}
+			}
 		}
-		return rank
+		return array;
+	},
+
+	saveRemainingValues(array,pair){
+		var arrayToPopulate = []
+		for (let i = 0; i < array.length; i++){
+			if(array[i] != pair){
+				arrayToPopulate.push(array[i]);
+			}
+		}
+		return arrayToPopulate
+	},
+
+	findRank: function(array,high) {
+		var valueArray = this.sortArray(this.cardValueConversion(array));
+		var suitArray = this.cardSuitConversion(array);
+		var tempStats;
+		var stats = {
+			rank: 1,
+			handValues: valueArray,
+			high: high,
+			pairs: [],
+			remainingValues: [],
+			trips: 0,
+			quads: 0
+		};
+		if(this.straight(valueArray) && this.flush(suitArray) && high == 14){
+			stats.rank = 10;
+		}else if (this.straight(valueArray) && this.flush(suitArray)){
+			stats.rank = 9;
+		}else if(this.checkDupes(valueArray,4).hasHand){
+			tempStats = this.checkDupes(valueArray,4)
+			stats.rank = 8;
+			stats.quads = tempStats.pairs[0]
+			stats.remainingValues = tempStats.remainingValues
+		}else if(this.fullHouse(valueArray).hasHand){
+			stats.rank = 7;
+			stats.trips = this.fullHouse(valueArray).trips
+			stats.pairs.push(this.fullHouse(valueArray).pairs[0])
+		}else if(this.flush(suitArray)){
+			stats.rank = 6;
+		}else if(this.straight(valueArray)){
+			stats.rank = 5;
+		}else if(this.checkDupes(valueArray,3).hasHand){
+			tempStats = this.checkDupes(valueArray,3)
+			stats.rank = 4;
+			stats.trips = tempStats.pairs
+		}else if(this.twoPair(valueArray).hasHand){
+			tempStats = this.twoPair(valueArray);
+			stats.rank = 3;
+			stats.pairs = tempStats.pairs
+			stats.remainingValues = tempStats.remainingValues
+		}else if(this.checkDupes(valueArray,2).hasHand){
+			tempStats = this.checkDupes(valueArray,2)
+			stats.rank = 2;
+			stats.pairs = tempStats.pairs
+			stats.remainingValues = tempStats.remainingValues
+		}else{
+			stats.rank = 1;
+		}
+		return stats
 	}
 }
 
 module.exports = functions
+
+
+
+
+
+
+
+

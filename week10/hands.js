@@ -1000,10 +1000,9 @@ QC KC 3S JC KD 2C 8D AH QS TS
 AS KD 3D JD 8H 7C 8C 5C QD 6C`
 
 
-// console.log(hands)
+
 
 var theHands = cards.split("\n");
-// console.log(hands)
 var splitHands = []
 for (let i = 0; i < theHands.length; i++){
 	splitHands.push(theHands[i].split(' '))
@@ -1018,8 +1017,6 @@ var hands = {
 	player1: player1Hands,
 	player2: player2Hands
 }
-// console.log(splitHands[0].length)
-// console.log(player2Hands)
 
 module.exports = hands
 
