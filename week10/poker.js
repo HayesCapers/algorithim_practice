@@ -4,6 +4,11 @@ var hands = require('./hands.js');
 var pFunct = require('./functions.js')
 var tieFunct = require('./tieBreak-functions.js')
 
+// main function to test two hands against each other
+// takes two arguments (both must be arrays of the same length)
+// 1. array containing player 1's hand/hands
+// 2. array containing player 2's hand/hands
+// Returns an object with the number of hands player 1 wins and the number of hands player 2 wins
 function checkHands(player1Hands,player2Hands){
 	var p1Score = 0;
 	var p2Score = 0;
@@ -31,18 +36,13 @@ function checkHands(player1Hands,player2Hands){
 	return scores;
 }
 
-// console.log('var player1 = checkHands(hands.player1,hands.player2)');
-// console.log('')
-// console.log('console.log(player1)');
-// console.log('')
-// console.log(checkHands(hands.player1,hands.player2));
-// console.log('')
-// console.log('If (player1 == 376){')
-// console.log('  var Me = GOD;')
-// console.log('}')
-// console.log('')
-// console.log('console.log(Me)')
-// console.log('...GOD')
+// If you have nodejs installed
+// run 'node poker' in the terminal while in this folder to see the results 
+// from the 1000 hands imported from the hands.js file
+// the result should be:
+// { player1: 376, player2: 624 }
+
+console.log(checkHands(hands.player1,hands.player2));
 
 
 
